@@ -18,7 +18,7 @@ msg_subject = None
 msg_body = None
 
 try:
-	opts, args = getopt.getopt(sys.argv[1:], '', ['tls', 'host=', 'port=', 'user=', 'pass=', 'from=', 'to=', 'subject='])
+	opts, args = getopt.getopt(sys.argv[1:], '', ['tls', 'host=', 'port=', 'user=', 'pass=', 'from=', 'to=', 'subject=', 'gmail', 'o365'])
 	for opt, arg in opts:
 		if opt == '--tls':
 			use_tls = True
@@ -30,6 +30,15 @@ try:
 			smtp_user = arg
 		elif opt == '--pass':
 			smtp_pass = arg
+
+		elif opt == '--gmail':
+			use_tls = True
+			smtp_host = 'smtp.gmail.com'
+			smtp_port = 587
+		elif opt == '--o365':
+			use_tls = True
+			smtp_host = 'smtp.office365.com'
+			smtp_port = 587
 	
 		elif opt == '--from':
 			msg_sender = arg
