@@ -1,4 +1,4 @@
-#!/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import sys
 import getopt
@@ -17,25 +17,30 @@ msg_receipients = []
 msg_subject = None
 msg_body = None
 
-opts, args = getopt.getopt(sys.argv[1:], '', ['tls', 'host=', 'port=', 'user=', 'pass=', 'from=', 'to=', 'subject='])
-for opt, arg in opts:
-	if opt == '--tls':
-		use_tls = True
-	elif opt == '--host':
-		smtp_host = arg
-	elif opt == '--port':
-		smtp_port = arg
-	elif opt == '--user':
-		smtp_user = arg
-	elif opt == '--pass':
-		smtp_pass = arg
+try:
+	opts, args = getopt.getopt(sys.argv[1:], '', ['tls', 'host=', 'port=', 'user=', 'pass=', 'from=', 'to=', 'subject='])
+	for opt, arg in opts:
+		if opt == '--tls':
+			use_tls = True
+		elif opt == '--host':
+			smtp_host = arg
+		elif opt == '--port':
+			smtp_port = arg
+		elif opt == '--user':
+			smtp_user = arg
+		elif opt == '--pass':
+			smtp_pass = arg
+	
+		elif opt == '--from':
+			msg_sender = arg
+		elif opt == '--to':
+			msg_receipients.append(arg)
+		elif opt == '--subject':
+			msg_subject = arg
 
-	elif opt == '--from':
-		msg_sender = arg
-	elif opt == '--to':
-		msg_receipients.append(arg)
-	elif opt == '--subject':
-		msg_subject = arg
+except Exception, e:
+	print e
+	sys.exit(-1)
 	
 # 標準入力から読み込み
 msg_body = sys.stdin.read()
