@@ -47,6 +47,7 @@ class SMTPApp(App):
 
 	_msg_sender = None
 	_msg_recipients = []
+	_msg_copies = []
 	_msg_subject = None
 
 	def _pre_init(self):
@@ -61,6 +62,7 @@ class SMTPApp(App):
 		# message
 		self._lopts.append('from=')
 		self._lopts.append('to=')
+		self._lopts.append('cc=')
 		self._lopts.append('subject=')
 
 		# service
@@ -85,6 +87,8 @@ class SMTPApp(App):
 			self._msg_sender = arg
 		elif opt == '--to':
 			self._msg_recipients.append(arg)
+		elif opt == '--cc':
+			self._msg_copies.append(arg)
 		elif opt == '--subject':
 			self._msg_subject = arg
 
@@ -115,6 +119,7 @@ class SMTPApp(App):
 		msg['Subject'] = self._msg_subject
 		msg['From'] = self._msg_sender
 		msg['To'] = ', '.join(self._msg_recipients)
+		msg['Cc'] = ', '.join(self._msg_copies)
 		msg['Date'] = formatdate()
 		return msg
 
