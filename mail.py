@@ -1,11 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 import sys
 import getopt
 import getpass
 import smtplib
+from email.MIMEMultipart import MIMEMultipart
+from email.MIMEBase import MIMEBase
 from email.MIMEText import MIMEText
+from email.Utils import COMMASPACE
 from email.Utils import formatdate
+from email import Encoders
 
 class App:
 	_sopts = []
@@ -48,6 +53,7 @@ class SMTPApp(App):
 	_msg_sender = None
 	_msg_recipients = []
 	_msg_copies = []
+	_msg_attachments = []
 	_msg_subject = None
 
 	def _pre_init(self):
@@ -64,6 +70,7 @@ class SMTPApp(App):
 		self._lopts.append('to=')
 		self._lopts.append('cc=')
 		self._lopts.append('subject=')
+		self._lopts.append('attach=')
 
 		# service
 		self._lopts.append('gmail')
@@ -91,6 +98,8 @@ class SMTPApp(App):
 			self._msg_copies.append(arg)
 		elif opt == '--subject':
 			self._msg_subject = arg
+		elif opt == '--attach':
+			self._msg_attachments.append(arg)
 
 		elif opt == '--gmail':
 			self._use_tls = True
@@ -115,12 +124,24 @@ class SMTPApp(App):
 		
 		
 	def _compose_message(self):
-		msg = MIMEText(sys.stdin.read())
+		msg = MIMEMultipart()
 		msg['Subject'] = self._msg_subject
 		msg['From'] = self._msg_sender
-		msg['To'] = ', '.join(self._msg_recipients)
-		msg['Cc'] = ', '.join(self._msg_copies)
-		msg['Date'] = formatdate()
+		msg['Cc'] = COMMASPACE.join(self._msg_copies)
+		msg['To'] = COMMASPACE.join(self._msg_recipients)
+		msg['Date'] = formatdate(localtime=True)
+
+		msg.attach(MIMEText(sys.stdin.read()))
+
+		for fname in self._msg_attachments:
+			part = MIMEBase('application', 'octet-stream')
+			part.set_payload(open(fname, 'rb').read())
+			Encoders.encode_base64(part)
+			part.add_header(
+				'Content-Disposition',
+				'attachment; filename="%s"' % os.path.basename(fname))
+			msg.attach(part)
+
 		return msg
 
 	def run(self):
