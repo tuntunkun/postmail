@@ -55,6 +55,7 @@ class SMTPApp(App):
 	_msg_copies = []
 	_msg_attachments = []
 	_msg_subject = None
+	_msg_body = sys.stdin
 
 	def _pre_init(self):
 		self._lopts.append('tls')
@@ -70,6 +71,7 @@ class SMTPApp(App):
 		self._lopts.append('to=')
 		self._lopts.append('cc=')
 		self._lopts.append('subject=')
+		self._lopts.append('body=')
 		self._lopts.append('attach=')
 
 		# service
@@ -98,6 +100,10 @@ class SMTPApp(App):
 			self._msg_copies.append(arg)
 		elif opt == '--subject':
 			self._msg_subject = arg
+		elif opt == '--body':
+			if not self._msg_body is sys.stdin:
+				self._msg_body.close()
+			self._msg_body = open(arg, 'rb')
 		elif opt == '--attach':
 			self._msg_attachments.append(arg)
 
@@ -131,7 +137,7 @@ class SMTPApp(App):
 		msg['To'] = COMMASPACE.join(self._msg_recipients)
 		msg['Date'] = formatdate(localtime=True)
 
-		msg.attach(MIMEText(sys.stdin.read()))
+		msg.attach(MIMEText(self._msg_body.read()))
 
 		for fname in self._msg_attachments:
 			part = MIMEBase('application', 'octet-stream')
