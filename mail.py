@@ -89,6 +89,7 @@ class App(object):
 
 
 class SMTPApp(App):
+	_use_ssl = False
 	_use_tls = False
 
 	_smtp_host = 'localhost'
@@ -114,6 +115,7 @@ class SMTPApp(App):
 
 		# tls
 		self._append_option(None, None)
+		self._append_option(None, 'ssl', desc='SMTP サーバーとの通信に SSL による暗号化を使用します')
 		self._append_option(None, 'tls', desc='SMTP サーバーとの通信に TLS による暗号化を使用します')
 
 		# smtp
@@ -138,7 +140,9 @@ class SMTPApp(App):
 		if super(SMTPApp, self)._parse(opt, arg):
 			return result
 
-		if opt in ('--tls',):
+		if opt in ('--ssl',):
+			self._use_ssl = True
+		if opt in ('--tls'):
 			self._use_tls = True
 
 		elif opt in ('--host',):
@@ -215,9 +219,12 @@ class SMTPApp(App):
 		return msg
 
 	def _run(self):
-		smtp = smtplib.SMTP(self._smtp_host, self._smtp_port)
+		if self._use_ssl:
+			smtp = smtplib.SMTP_SSL(self._smtp_host, self._smtp_port)
+		else:
+			smtp = smtplib.SMTP(self._smtp_host, self._smtp_port)
+
 		smtp.ehlo()
-		
 		if self._use_tls:
 			smtp.starttls()
 		
