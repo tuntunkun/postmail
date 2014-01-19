@@ -20,19 +20,37 @@ class App(object):
 			self.type = type
 			self.desc = desc
 
+		def __str__(self):
+			if self.sopt is None and self.lopt is None:
+				return ''
+
+			str_lopt = '--%s' % self.lopt if not self.lopt is None else ''
+			str_type = '<%s>' % self.type if not self.type  is None else ''
+			str_desc = self.desc if not self.desc is None else ''
+
+			return '  {0}{1} {2}'.format(str_lopt, str_type, str_desc)
+
 	__options = []
 
 	def __init__(self, argv):
 		self._init(argv)
 
 	def _pre_init(self):
-		pass
+		self._append_option('h', 'help')
 
 	def _post_init(self, args):
 		pass
 
 	def _parse(self, opt, arg):
-		return False
+		result = True
+
+		if opt in ('-h', '--help'):
+			self._show_usage()
+			sys.exit(0)
+		else:
+			result = False
+
+		return result
 
 	def _short_opts(self):
 		return map(lambda x: x.sopt, filter(lambda x: not x.sopt is None, self.__options))
@@ -42,6 +60,12 @@ class App(object):
 
 	def _append_option(self, sopt, lopt, type=None, desc=None):
 		self.__options.append(App.Option(sopt, lopt, type, desc))
+
+	def _show_usage(self):
+		print 'Usage: %s [option]...' % sys.argv[0]
+
+		for option in self.__options:
+			print option
 
 	def _init(self, argv):
 		self._pre_init()
@@ -75,25 +99,30 @@ class SMTPApp(App):
 	def _pre_init(self):
 		super(SMTPApp, self)._pre_init()
 
+		# service
+		self._append_option(None, None)
+		self._append_option(None, 'gmail')
+		self._append_option(None, 'o365')
+
+		# tls
+		self._append_option(None, None)
 		self._append_option(None, 'tls')
 
 		# smtp
+		self._append_option(None, None)
 		self._append_option(None, 'host=', 'host')
 		self._append_option(None, 'port=', 'port')
 		self._append_option(None, 'user=', 'user')
 		self._append_option(None, 'pass=', 'password')
 
 		# message
+		self._append_option(None, None)
 		self._append_option(None, 'from=', 'email')
 		self._append_option(None, 'to=', 'email')
 		self._append_option(None, 'cc=', 'email')
 		self._append_option(None, 'subject=', 'text')
 		self._append_option(None, 'body=', 'file')
 		self._append_option(None, 'attach=', 'file')
-
-		# service
-		self._append_option(None, 'gmail')
-		self._append_option(None, 'o365')
 
 	def _parse(self, opt, arg):
 		result = True
