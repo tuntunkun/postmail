@@ -31,6 +31,7 @@ class App(object):
 			return '  {0}{1} {2}'.format(str_lopt, str_type, str_desc)
 
 	__options = []
+	__cmd = None
 
 	def __init__(self, argv):
 		self._init(argv)
@@ -62,15 +63,16 @@ class App(object):
 		self.__options.append(App.Option(sopt, lopt, type, desc))
 
 	def _show_usage(self):
-		print 'Usage: %s [option]...' % sys.argv[0]
+		print 'Usage: %s [option]...' % self.__cmd
 
 		for option in self.__options:
 			print option
 
 	def _init(self, argv):
+		self.__cmd = argv[0]
 		self._pre_init()
 
-		opts, args = getopt.getopt(argv, ''.join(self._short_opts()), self._long_opts())
+		opts, args = getopt.getopt(argv[1:], ''.join(self._short_opts()), self._long_opts())
 		for opt, arg in opts:
 			self._parse(opt, arg)
 
@@ -223,7 +225,7 @@ class SMTPApp(App):
 	
 	
 try:
-	app = SMTPApp(sys.argv[1:])
+	app = SMTPApp(sys.argv)
 	app.run()
 except KeyboardInterrupt:
 	pass
