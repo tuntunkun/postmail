@@ -34,10 +34,10 @@ class App(object):
 			return '%20s  %s' % (str_opt, str_desc)
 
 	__options = []
-	__cmd = None
+	__argv = None
 
 	def __init__(self, argv):
-		self._init(argv)
+		self.__argv = argv
 
 	def _pre_init(self):
 		self._append_option('h', 'help', desc='ヘルプを表示します')
@@ -49,7 +49,7 @@ class App(object):
 		result = True
 
 		if opt in ('-h', '--help'):
-			self._show_usage()
+			self.show_usage()
 			sys.exit(0)
 		else:
 			result = False
@@ -65,24 +65,27 @@ class App(object):
 	def _append_option(self, sopt, lopt, type=None, desc=None):
 		self.__options.append(App.Option(sopt, lopt, type, desc))
 
-	def _show_usage(self):
-		print 'Usage: %s [option]...' % self.__cmd
+	def show_usage(self):
+		print 'Usage: %s [option]...' % self.__argv[0]
 
 		for option in self.__options:
 			print option
 
-	def _init(self, argv):
-		self.__cmd = argv[0]
+	def _init(self):
 		self._pre_init()
 
-		opts, args = getopt.getopt(argv[1:], ''.join(self._short_opts()), self._long_opts())
+		opts, args = getopt.getopt(self.__argv[1:], ''.join(self._short_opts()), self._long_opts())
 		for opt, arg in opts:
 			self._parse(opt, arg)
 
 		self._post_init(args)
 
-	def run(self):
+	def _run(self):
 		pass
+
+	def run(self):
+		self._init()
+		self._run()
 
 
 class SMTPApp(App):
@@ -211,7 +214,7 @@ class SMTPApp(App):
 
 		return msg
 
-	def run(self):
+	def _run(self):
 		smtp = smtplib.SMTP(self._smtp_host, self._smtp_port)
 		smtp.ehlo()
 		
@@ -234,5 +237,8 @@ except KeyboardInterrupt:
 	pass
 except smtplib.SMTPException, e:
 	print >>sys.stderr, e.smtp_error
+	print >>sys.stderr, ''
 except Exception, e:
 	print >>sys.stderr, e
+	print >>sys.stderr, ''
+	app.show_usage()
