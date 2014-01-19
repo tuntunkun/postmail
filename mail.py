@@ -24,11 +24,14 @@ class App(object):
 			if self.sopt is None and self.lopt is None:
 				return ''
 
+			str_sopt = '-%s, ' % self.sopt if not self.sopt is None else ''
 			str_lopt = '--%s' % self.lopt if not self.lopt is None else ''
 			str_type = '<%s>' % self.type if not self.type  is None else ''
 			str_desc = self.desc if not self.desc is None else ''
 
-			return '  {0}{1} {2}'.format(str_lopt, str_type, str_desc)
+			str_opt = '%s%s%s' % (str_sopt, str_lopt, str_type)
+
+			return '%20s  %s' % (str_opt, str_desc)
 
 	__options = []
 	__cmd = None
@@ -37,7 +40,7 @@ class App(object):
 		self._init(argv)
 
 	def _pre_init(self):
-		self._append_option('h', 'help')
+		self._append_option('h', 'help', desc='ヘルプを表示します')
 
 	def _post_init(self, args):
 		pass
@@ -103,28 +106,28 @@ class SMTPApp(App):
 
 		# service
 		self._append_option(None, None)
-		self._append_option(None, 'gmail')
-		self._append_option(None, 'o365')
+		self._append_option(None, 'gmail', desc='送信用 SMTP サーバーとして GMail を使用します')
+		self._append_option(None, 'o365', desc='送信用 SMTP サーバーとして Office365 を使用します')
 
 		# tls
 		self._append_option(None, None)
-		self._append_option(None, 'tls')
+		self._append_option(None, 'tls', desc='SMTP サーバーとの通信に TLS による暗号化を使用します')
 
 		# smtp
 		self._append_option(None, None)
-		self._append_option(None, 'host=', 'host')
-		self._append_option(None, 'port=', 'port')
-		self._append_option(None, 'user=', 'user')
-		self._append_option(None, 'pass=', 'password')
+		self._append_option(None, 'host=', 'host', 'SMTP サーバーのホスト名を指定します')
+		self._append_option(None, 'port=', 'port', 'SMTP サーバーのポートを指定します')
+		self._append_option(None, 'user=', 'user', 'SMTP 認証に利用する ユーザー名 を指定します')
+		self._append_option(None, 'pass=', 'password', 'SMTP 認証に利用する パスワード を指定します')
 
 		# message
 		self._append_option(None, None)
-		self._append_option(None, 'from=', 'email')
-		self._append_option(None, 'to=', 'email')
-		self._append_option(None, 'cc=', 'email')
-		self._append_option(None, 'subject=', 'text')
-		self._append_option(None, 'body=', 'file')
-		self._append_option(None, 'attach=', 'file')
+		self._append_option(None, 'from=', 'email', '差出人を指定します')
+		self._append_option(None, 'to=', 'email', '宛先を指定します（複数可）')
+		self._append_option(None, 'cc=', 'email', 'CC を指定します（複数可)')
+		self._append_option(None, 'subject=', 'text', '題名を指定します')
+		self._append_option(None, 'body=', 'file', '本文として送るファイルを指定します')
+		self._append_option(None, 'attach=', 'file', '添付ファイルを指定します（複数可）')
 
 	def _parse(self, opt, arg):
 		result = True
