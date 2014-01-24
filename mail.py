@@ -4,6 +4,7 @@ import os
 import sys
 import getopt
 import getpass
+import gettext
 import smtplib
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
@@ -11,6 +12,8 @@ from email.MIMEText import MIMEText
 from email.Utils import COMMASPACE
 from email.Utils import formatdate
 from email import Encoders
+
+_ = gettext.gettext
 
 class App(object):
 	class Option(object):
@@ -40,7 +43,7 @@ class App(object):
 		self.__argv = argv
 
 	def _pre_init(self):
-		self._append_option('h', 'help', desc='ヘルプを表示します')
+		self._append_option('h', 'help', desc=_('show this help'))
 
 	def _post_init(self, args):
 		pass
@@ -110,29 +113,29 @@ class SMTPApp(App):
 
 		# service
 		self._append_option(None, None)
-		self._append_option(None, 'gmail', desc='送信用 SMTP サーバーとして GMail を使用します')
-		self._append_option(None, 'o365', desc='送信用 SMTP サーバーとして Office365 を使用します')
+		self._append_option(None, 'gmail', desc=_('use GMail as a smtp server'))
+		self._append_option(None, 'o365', desc=_('use Office365 as a smtp server'))
 
 		# tls
 		self._append_option(None, None)
-		self._append_option(None, 'ssl', desc='SMTP サーバーとの通信に SSL による暗号化を使用します')
-		self._append_option(None, 'tls', desc='SMTP サーバーとの通信に TLS による暗号化を使用します')
+		self._append_option(None, 'ssl', desc=_('use SSL as an smtp connection encryption method'))
+		self._append_option(None, 'tls', desc=_('use TLS as an smtp connection encryption method'))
 
 		# smtp
 		self._append_option(None, None)
-		self._append_option(None, 'host=', 'host', 'SMTP サーバーのホスト名を指定します')
-		self._append_option(None, 'port=', 'port', 'SMTP サーバーのポートを指定します')
-		self._append_option(None, 'user=', 'user', 'SMTP 認証に利用する ユーザー名 を指定します')
-		self._append_option(None, 'pass=', 'password', 'SMTP 認証に利用する パスワード を指定します')
+		self._append_option(None, 'host=', 'host', _('hostname of smtp server'))
+		self._append_option(None, 'port=', 'port', _('port-number of smtp server'))
+		self._append_option(None, 'user=', 'user', _('smtp authentication username'))
+		self._append_option(None, 'pass=', 'password', _('smtp authentication password'))
 
 		# message
 		self._append_option(None, None)
-		self._append_option(None, 'from=', 'email', '差出人を指定します')
-		self._append_option(None, 'to=', 'email', '宛先を指定します（複数可）')
-		self._append_option(None, 'cc=', 'email', 'CC を指定します（複数可)')
-		self._append_option(None, 'subject=', 'text', '題名を指定します')
-		self._append_option(None, 'body=', 'file', '本文として送るファイルを指定します')
-		self._append_option(None, 'attach=', 'file', '添付ファイルを指定します（複数可）')
+		self._append_option(None, 'from=', 'email', _('e-mail address of the sender'))
+		self._append_option(None, 'to=', 'email', _('e-mail address of the recipient'))
+		self._append_option(None, 'cc=', 'email', _('e-mail address of the CC'))
+		self._append_option(None, 'subject=', 'text', _('subject of message'))
+		self._append_option(None, 'body=', 'file', _('body of message'))
+		self._append_option(None, 'attach=', 'file', _('attachment file'))
 
 	def _parse(self, opt, arg):
 		result = True
@@ -188,13 +191,13 @@ class SMTPApp(App):
 		super(SMTPApp, self)._post_init(args)
 
 		if len(self._msg_recipients) < 1:
-			raise Exception('you must specify at least one recipient email address')
+			raise Exception(_('you must specify at least one recipient email address'))
 
 		if self._smtp_auth and self._smtp_user is None:
-			raise Exception('you must specify smtp user to authenticate')
+			raise Exception(_('you must specify smtp user to authenticate'))
 
 		if self._smtp_auth and self._smtp_pass is None:
-			self._smtp_pass = getpass.getpass('password: ')
+			self._smtp_pass = getpass.getpass(_('password: '))
 		
 		
 	def _compose_message(self):
@@ -243,9 +246,7 @@ try:
 except KeyboardInterrupt:
 	pass
 except smtplib.SMTPException, e:
-	print >>sys.stderr, e.smtp_error
-	print >>sys.stderr, ''
+	print >>sys.stderr, '\033[31m%s\033[0m' % e.smtp_error
 except Exception, e:
-	print >>sys.stderr, e
-	print >>sys.stderr, ''
+	print >>sys.stderr, '\033[33m%s\033[0m\n' % e
 	app.show_usage()
