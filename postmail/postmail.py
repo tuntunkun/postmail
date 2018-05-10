@@ -257,13 +257,17 @@ class SMTPApp(App):
 		smtp.close()
 	
 	
-try:
-	app = SMTPApp(sys.argv)
-	app.run()
-except KeyboardInterrupt:
-	pass
-except smtplib.SMTPException, e:
-	print >>sys.stderr, '\033[31m%s\033[0m' % e.smtp_error
-except Exception, e:
-	print >>sys.stderr, '\033[33m%s\033[0m\n' % e
-	app.show_usage()
+def main():
+	try:
+		app = SMTPApp(sys.argv)
+		app.run()
+	except KeyboardInterrupt:
+		pass
+	except smtplib.SMTPException, e:
+		print >>sys.stderr, '\033[31m%s\033[0m' % e.smtp_error
+	except Exception, e:
+		print >>sys.stderr, '\033[33m%s\033[0m\n' % e
+		app.show_usage()
+
+if __name__ == '__main__':
+	main()
